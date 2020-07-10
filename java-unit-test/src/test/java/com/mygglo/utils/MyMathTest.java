@@ -34,8 +34,8 @@ class MyMathTest {
         int result = myMath.sum(numbers);
 
         //Assertion
-         assertThat(result).isNotNull();
-         assertThat(result).isEqualTo(6);
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(6);
     }
 
     @Test
