@@ -1,5 +1,6 @@
 package com.example.springbootintegrationtest.controller;
 
+import com.example.springbootintegrationtest.domain.Student;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -11,8 +12,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.PostConstruct;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -24,25 +27,41 @@ class StudentControllerTest {
     TestRestTemplate restTemplate = new TestRestTemplate();
     HttpHeaders headers = new HttpHeaders();
 
+    private String uri;
+    @PostConstruct
+    public void init() {
+        uri = "http://localhost:" + port;
+    }
 
     @Test
     public void testCreateStudent() throws Exception {
+        String url = uri +  "/students";
         HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-        ResponseEntity<String> response = restTemplate.exchange(
-                createURLWithPort("/students"), HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
         String actual = response.getHeaders().get(HttpHeaders.LOCATION).get(0);
-        assertTrue(actual.contains("/students"));
+        assertThat(actual.contains("/students")).isTrue();
     }
+
     @Test
     public void testRetrieveStudent() throws Exception {
+        String url = uri +  "/students/6";
         HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-        ResponseEntity<String> response = restTemplate.exchange(
-                createURLWithPort("/students/1"), HttpMethod.GET, entity, String.class);
-        String expected = "{\"id\":1,\"name\":\"Rajesh Bhojwani\",\"description\":\"Class 10\"}";
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        String expected = "{\"id\":6,\"name\":\"Dolor\",\"description\":\"Student 6\"}";
         JSONAssert.assertEquals(expected, response.getBody(), false);
     }
-    private String createURLWithPort(String uri) {
-        return "http://localhost:" + port + uri;
+
+    @Test
+    public void testPostStudent() throws Exception {
+        String url = uri +  "/student";
+        Student student = new Student("Test1","Description1");
+
+        HttpEntity<Student> entity = new HttpEntity<Student>(student, headers);
+        ResponseEntity<Student> response = restTemplate.exchange(url, HttpMethod.POST, entity, Student.class);
+        Student responseStudent = response.getBody();
+
+        assertThat(responseStudent.getName()).isEqualTo(student.getName());
+        assertThat(responseStudent.getDescription()).isEqualTo(student.getDescription());
     }
 
 }
