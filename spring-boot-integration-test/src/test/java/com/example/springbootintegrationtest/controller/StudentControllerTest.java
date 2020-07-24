@@ -1,9 +1,13 @@
 package com.example.springbootintegrationtest.controller;
 
 import com.example.springbootintegrationtest.domain.Student;
+import com.example.springbootintegrationtest.repository.StudentRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -16,8 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.annotation.PostConstruct;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class StudentControllerTest {
@@ -27,10 +29,19 @@ class StudentControllerTest {
     TestRestTemplate restTemplate = new TestRestTemplate();
     HttpHeaders headers = new HttpHeaders();
 
+    @Autowired
+    StudentRepository repository;
+
     private String uri;
-    @PostConstruct
+    @BeforeEach
     public void init() {
         uri = "http://localhost:" + port;
+        // TODO: 24/07/2020 insert data with repository 
+    }
+
+    @AfterEach
+    public void clean() {
+        repository.deleteAll();
     }
 
     @Test
@@ -60,6 +71,7 @@ class StudentControllerTest {
         ResponseEntity<Student> response = restTemplate.exchange(url, HttpMethod.POST, entity, Student.class);
         Student responseStudent = response.getBody();
 
+        assertThat(responseStudent.getId()).isNotNull();
         assertThat(responseStudent.getName()).isEqualTo(student.getName());
         assertThat(responseStudent.getDescription()).isEqualTo(student.getDescription());
     }

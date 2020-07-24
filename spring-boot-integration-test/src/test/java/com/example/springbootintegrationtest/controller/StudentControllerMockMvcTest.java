@@ -3,6 +3,7 @@ package com.example.springbootintegrationtest.controller;
 import com.example.springbootintegrationtest.domain.Student;
 import com.example.springbootintegrationtest.repository.StudentRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -39,6 +40,16 @@ class StudentControllerMockMvcTest {
 
     @Autowired
     StudentRepository studentRepository;
+
+    @Autowired
+    StudentRepository repository;
+
+    @AfterEach
+    public void clean() {
+        // TODO: 24/07/2020 ajouter une condition pour ne pas supprimer les données d'initialisatipn
+        repository.deleteAll();
+    }
+
 
     @Test
     public void testCreateStudent() throws Exception {
